@@ -162,7 +162,11 @@ int main(int argc, char** argv) {
 
     std::string chosen_map;
 
-    if (maps.size() == 1) {
+    if (maps.size() == 0) {
+        std::cerr << "No keymaps in the keymap directory\n";
+        return EXIT_FAILURE;
+    }
+    else if (maps.size() == 1) {
         chosen_map = "keymaps/" + maps[0];
     }
     else {
@@ -221,6 +225,5 @@ int main(int argc, char** argv) {
         vkbd.doKeyOutput(mkey);
     }
 
-exitProgram:
     return EXIT_SUCCESS;
 }
