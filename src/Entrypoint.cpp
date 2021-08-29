@@ -1,6 +1,7 @@
 #include "VirtualKeyboard.h"
 #include "Keyboard.h"
 #include "KeyMap.h"
+#include "KeyTable.h"
 
 #include <iostream>
 #include <signal.h>
@@ -56,14 +57,66 @@ const char* exampleMap[] = {
     "//which means either sudo, or making your user part of the appropriate group\n",
     "//Keys are defined by:  [key] [action(s)] [behaviour modifiers]\n",
     "//Keys are accpeted as names or scancodes\n",
-    "//Use quotes to enclose multiple key actions or behaviour modifiers\n"
+    "//Use quotes to enclose multiple key actions or behaviour modifiers\n",
+    "//Global key delay can be set by specifying delay on the device\n",
     "\n",
     "device \"name goes here\"\n",
-    "45 \"lctrl+ z lctrl-\"\n",
+    "45 \"lctrl+ z lctrl-\" -delay:50000000 \n",
     "t backspace -allowrepeat\n",
     "z kp*\n",
     "y \"h e l l o\"\n",
 };
+
+void printkeys() {
+    for(auto& entry : table<>) {
+        std::cout << entry.name << " (" << entry.key << ")\n";
+    }
+}
+
+long globalInputDelay = 0;
+
+void setdelay(const char* number) {
+    size_t pos = 0;
+    while(number[pos] == '\0') {
+        if (number[pos] < '0' || number[pos] > '9') {
+            std::cerr << "Unrecognized delay time of: " << number << "\n";
+            return;
+        }
+
+        pos++;
+    }
+
+    globalInputDelay = atol(number);
+}
+
+void printhelp() {
+    std::cout << "\n"
+    << "-help - view this message\n"
+    << "-listkeys - list the key names recognized and their scancodes\n"
+    << "-delay:[number] - set the global input delay time in nanoseconds\n";
+}
+
+bool argparse(int argc, char** argv) {
+    for(size_t i = 0; i < argc; i++) {
+        char* param = argv[i];
+
+        if (param[0] == '-') {
+            if (strcmp(param, "-help") == 0) {
+                printhelp();
+                return true;
+            }
+            else if (strcmp(param, "-listkeys") == 0) {
+                printkeys();
+                return true;
+            }
+            else if (strncmp(param, "-delay:", 7)==0) {
+                setdelay(param + 7);
+            }
+        }
+    }
+
+    return false;
+}
 
 int main(int argc, char** argv) {
     struct sigaction term{};
@@ -78,6 +131,12 @@ int main(int argc, char** argv) {
     sigaction(SIGTERM, &term, NULL);
     sigaction(SIGINT, &inter, NULL);
     sigaction(SIGQUIT, &quit, NULL);
+
+    if (argc > 1) {
+        if (argparse(argc, argv)) {
+            return EXIT_SUCCESS;
+        }
+    }
 
     if (!exists("modules")) {
         mkdir("modules", S_IRWXU);
@@ -147,7 +206,7 @@ int main(int argc, char** argv) {
 
     auto map = macro::KeyMap(chosen_map);
     auto kbd = macro::Keyboard(map.getDeviceName());
-    macro::VirtualKeyboard vkbd;
+    auto vkbd = macro::VirtualKeyboard(globalInputDelay);
 
     input_event ev;
     int code = 0;

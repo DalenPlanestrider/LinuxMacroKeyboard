@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cstring>
 
+extern long globalInputDelay;
+
 namespace macro {
 
     std::vector<std::string> split(const std::string& input) {
@@ -54,19 +56,34 @@ namespace macro {
         char* line = NULL;
         ssize_t readbytes;
 
-        std::string devline;
         std::vector<std::string> lines;
 
         while((readbytes = getline(&line, &len, mapfd) != -1)) {
-            if (strncmp("device ", line, 7) == 0) {
-                char* name = line + 7;
+            if (strncmp("device", line, 6) == 0) {
+                auto comps = split(line);
 
-                size_t offset = 0;
-                while(name[offset] != '\0') {
-                    if (name[offset] != '\"' && name[offset] != '\n') {
-                        devline += name[offset];
+                if (comps.size() < 2) {
+                    std::cerr << "No device specified\n";
+                    return;
+                }
+
+                deviceName = comps[1];
+
+                if (comps.size() >= 3) {
+                    auto mods = split(comps[2]);
+
+                    for(auto& mod : mods) {
+                        if (mod[0] == '-') {
+                            if (strncmp(mod.c_str(), "-delay:", 7) == 0) {
+                                if (globalInputDelay == 0) {
+                                    globalInputDelay = atol(mod.c_str() + 7);
+                                }
+                                else {
+                                    std::cout << "Ignoring map global delay since it was set from command line\n";
+                                }
+                            }
+                        }
                     }
-                    offset++;
                 }
             }
             else {
@@ -84,8 +101,6 @@ namespace macro {
         }
 
         fclose(mapfd);
-
-        deviceName = devline;
 
         for(size_t i = 0; i < lines.size(); i++) {
             auto comps = split(lines[i]);
