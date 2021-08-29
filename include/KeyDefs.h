@@ -23,6 +23,7 @@ namespace macro {
     struct MappedKey {
         int code;
         bool allowRepeat;
+        long sleeptime;
         KeyOutput actions[10]; // A key can't have more than 10 actions mapped to it
     };
 }

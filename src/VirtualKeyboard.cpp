@@ -49,7 +49,7 @@ namespace macro {
         }
 
         devCreated = true;
-        sleeptime = {0, pressDelayNanoseconds};
+        defaultSleeptime = pressDelayNanoseconds;
     }
 
     VirtualKeyboard::~VirtualKeyboard() {
@@ -63,6 +63,13 @@ namespace macro {
 
     void VirtualKeyboard::doKeyOutput(const MappedKey& mkey) {
         struct input_event ie{};
+
+        if (mkey.sleeptime != 0) {
+            sleeptime.tv_nsec = mkey.sleeptime;
+        }
+        else {
+            sleeptime.tv_nsec = defaultSleeptime;
+        }
 
         for(auto& key : mkey.actions) {
             if (key.action == None) {

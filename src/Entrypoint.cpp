@@ -114,19 +114,19 @@ int main(int argc, char** argv) {
         }
 
         std::string inputNum;
-        std::cin >> inputNum;
         int selectedID = 0;
 
         bool selected = false;
         while (!selected) {
             std::cout << "Enter a number of a map to select it, or exit to close the program\n";
+            std::cin >> inputNum;
 
             if (inputNum == "exit") {
                 exit(0);
             }
 
             for(auto& character : inputNum) {
-                if (character <= '0' || character >= '9') {
+                if (character < '0' || character > '9') {
                     std::cout << "Invalid input, only numbers\n";
                     continue;
                 }
@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
 
             selectedID = atoi(inputNum.c_str());
 
-            if (selectedID <= maps.size() || selectedID < 0) {
+            if (selectedID >= maps.size() || selectedID < 0) {
                 std::cout << "Not a valid map\n";
                 continue;
             }

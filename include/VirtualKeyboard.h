@@ -9,9 +9,10 @@ namespace macro {
         int uinputFD;
         bool fdCreated;
         bool devCreated;
+        long defaultSleeptime;
         timespec sleeptime;
     public:
-        VirtualKeyboard(long pressDelayNanosecond = 50000000);
+        VirtualKeyboard(long pressDelayNanosecond = 0);
         ~VirtualKeyboard();
 
 

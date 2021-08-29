@@ -99,7 +99,10 @@ namespace macro {
             bool isNumeric = true;;
 
             for(auto& chara : comps[0]) {
-                if (chara <= '0' || chara >= '9') {
+                if (chara == ' ') {
+                    break;
+                }
+                else if (chara < '0' || chara > '9') {
                     isNumeric = false;
                     break;
                 }
@@ -146,7 +149,10 @@ namespace macro {
                 bool isNumeric = true;
 
                 for(auto& chara : keycode) {
-                    if (chara <= '0' || chara >= '9') {
+                    if (chara == ' ') {
+                        break;
+                    }
+                    else if (chara < '0' || chara > '9') {
                         isNumeric = false;
                         break;
                     }
@@ -167,11 +173,20 @@ namespace macro {
                 k.actions[j] = output;
             }
 
-            for(int j = 2; j < comps.size(); j++) {
-                auto mod = comps[j];
+            std::vector<std::string> mods;
+            if (comps.size() > 2) {
+                mods = split(comps[2]);
+            }
+
+            for(int j = 0; j < mods.size(); j++) {
+                auto& mod = mods[j];
                 if (mod[0] == '-') {
                     if (strcmp(mod.c_str(), "-allowrepeat") == 0) {
                         k.allowRepeat = true;
+                    }
+                    else if (strncmp(mod.c_str(), "-delay:", 7) == 0) {
+                        const char* val = mod.c_str() + 7;
+                        k.sleeptime = atol(val);
                     }
                 }
                 else {
