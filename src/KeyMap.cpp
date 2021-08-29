@@ -167,8 +167,8 @@ namespace macro {
                 k.actions[j] = output;
             }
 
-            for(int j = 2; j < keys.size(); j++) {
-                auto mod = keys[j];
+            for(int j = 2; j < comps.size(); j++) {
+                auto mod = comps[j];
                 if (mod[0] == '-') {
                     if (strcmp(mod.c_str(), "-allowrepeat") == 0) {
                         k.allowRepeat = true;
